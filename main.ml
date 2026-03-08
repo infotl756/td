@@ -1,4 +1,35 @@
-(* TP Ocaml sur les listes *)
+
+(* TP 1 Ocaml *)
+
+let tempsdeVol p =
+    let rec aux acc n =
+        if acc = 1 then n else match acc mod 2 with
+            | 0 -> aux (acc/2) (n+1)
+            | _ -> aux (3*acc+1) (n+1)
+    in aux p 0;;
+
+let c4 = tempsdeVol 37;;
+
+let hauteur p =
+    let rec aux acc n max_t =
+        if acc = 1 then max_t else match acc mod 2 with
+            | 0 -> aux (acc/2) (n+1) (max acc max_t)
+            | _ -> aux (3*acc+1) (n+1) (max acc max_t)
+    in aux p 0 p;;
+
+let c5 = hauteur 2049;;
+
+let somme p = 
+    let rec aux acc n s =
+        if acc = 1 then (s+1) else match acc mod 2 with
+            | 0 -> aux (acc/2) (n+1) (s+acc)
+            | _ -> aux (3*acc+1) (n+1) (s+acc)
+    in aux p 0 0;;
+
+let c6 = somme 2049;;
+
+
+(* *)
 
 (* 1 *)
 let nombre_occurences l x = 
