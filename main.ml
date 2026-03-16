@@ -39,4 +39,54 @@ let rec insere x l = match l with
         else t::(insere x q);;
 
 let tri_insertion = iteration_droite insere l [];;
+
+let tri_insertion = iteration_droite insere l [];;
     
+(*cor*)
+
+let rec echange = function 
+	|[] -> []
+	|[a] -> [a]
+	|a::b::q when a>b -> b::(echange (a::q))
+	|a::b::q  -> a::(echange (b::q));;
+	
+	
+let rec tri_bulle l = 
+	let l2= echange l in 
+		if l= l2 then l else tri_bulle l2;;
+
+
+
+let rec minimum = function
+	|[] -> raise (Failure "liste vide")
+	|[e]-> e
+	|t::q -> min t (minimum q);;	
+
+let extraction l m =
+	let 
+	let rec aux debut fin = match fin with
+		|[] -> debut
+		|t::q -> 
+			if t = m then debut @ q
+			else aux (t::debut) q
+	in aux [] l;;
+	
+let tri_selection l =
+	let rec aux l_triee reste = match reste with
+		|[] -> List.rev l_triee
+		|t::q -> let m = (minimum reste) in 
+			aux (m::l_triee) (extraction reste m)
+	in aux [] l;;
+	
+let separation l =
+	let len = List.length l in
+	let rec aux g d = function
+		|i when i = len / 2 -> g, d
+		|i -> match d with	
+			|[] -> raise (Failure "cas impossible")
+			|t::q -> aux (t::g) q (i+1)
+	in aux [] l 0;;
+
+let fusion l1, l2 =
+	let rec aux deb fin =
+		
