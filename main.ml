@@ -22,6 +22,3 @@ let evaluation p v =
     let rec aux acc l = match l with
         | [] -> acc
         | t::q -> 
-
-let tri_insertion = iteration_droite insere l [];;
-    
