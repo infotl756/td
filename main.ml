@@ -23,3 +23,5 @@ let evaluation p v =
         | [] -> acc
         | t::q -> 
 
+let tri_insertion = iteration_droite insere l [];;
+    
