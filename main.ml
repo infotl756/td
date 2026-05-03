@@ -1,183 +1,124 @@
-let tri_insertion = iteration_droite insere l [];;
+type 'a ab = Vide | N of 'a * 'a ab * 'a ab;;
 
 
-    
+type ('a,'b) abs = F of 'a | NI of 'b * ('a,'b) abs * ('a,'b) abs;;
 
+let rec complet_ab n e =
 
-(*cor*)
+	if n<=0 then Vide
+	else N(e, complet_ab (n-1) e, complet_ab (n-1) e);;
 
 
 
+let rec complet_abs n e =
+	if n<=0 then F e
+   else NI(e, complet_abs (n-1) e, complet_abs (n-1) e);;
 
 
-let rec echange = function 
+let complet2_abs n =
+	 let rec aux h k =
+		if h<=0 then F k
+		else NI(k, aux (h-1) (2*k), aux (h-1) (2*k+1))
+	in aux n 1;;
 
 
-	|[] -> []
 
 
-	|[a] -> [a]
+(* ex 2*)
 
 
-	|a::b::q when a>b -> b::(echange (a::q))
+type 'a ag = NG of 'a * 'a ag list;;
 
 
-	|a::b::q  -> a::(echange (b::q));;
+let rec nb_feuilles = function
+	|NG(_,[]) -> 1
+	|NG(_,l) -> fold_left (fun acc t -> acc + nb_feuilles t) 0 l;;
 
 
-	
 
+let rec hauteur = function
+	|NG(_,[]) -> 0
+	|NG(_,l) -> 1 + fold_left (fun acc t -> max acc (hauteur t)) 0 l;;
 
-	
 
+(* ex 3*)
 
-let rec tri_bulle l = 
+let rec max_ab = function
+   |Vide -> failwith "vide"
+	|N(v,g,d) ->
+		 let mg = match g with Vide -> v | _ -> max_ab g in
+		let md = match d with Vide -> v | _ -> max_ab d in
+	     max v (max mg md);;
 
 
-	let l2= echange l in 
 
+let rec max_abs = function
+	|F v -> v
+	|NI(v,g,d) -> max v (max (max_abs g) (max_abs d));;
 
-		if l= l2 then l else tri_bulle l2;;
 
 
 
 
+let list_prof_ab a x =
+	let rec aux t prof =
+		 match t with
+		|Vide -> []
+		|N(v,g,d) ->
+			 let l = if v=x then [prof] else [] in
+			l @ (aux g (prof+1)) @ (aux d (prof+1))
+in aux a 0;;
 
 
 
+let list_prof_abs a x =
+	let rec aux t prof =
+		match t with
+		|F v -> if v=x then [prof] else []
+		|NI(v,g,d) ->
+			let l = if v=x then [prof] else [] in
+			l @ (aux g (prof+1)) @ (aux d (prof+1))
+	in aux a 0;;
 
 
+(* ex 4 *) 
 
 
-let rec minimum = function
 
+let generation a n =
+	let rec aux t prof =
+		match t with
+		|Vide -> []
+		|N(v,g,d) ->
+			if prof = n then [v]
+			else (aux g (prof+1)) @ (aux d (prof+1))
+	in aux a 0;;
 
-	|[] -> raise (Failure "liste vide")
 
 
-	|[e]-> e
 
+let parcours_profondeur a =
+	let rec aux = function
+		|Vide -> ()
+		|N(v,g,d) ->
+			printf "%d\n" v;
+			aux g;
+			aux d
+	in aux a;;
 
-	|t::q -> min t (minimum q);;	
 
 
 
 
+(* ex 5 *)
+let somme_profondeurs a =
+	let rec aux t prof =
+		match t with
+		|Vide -> 0
+		|N(_,Vide,Vide) -> prof
+		|N(_,g,d) -> (aux g (prof+1)) + (aux d (prof+1))
+	in aux a 0;;
 
-let extraction l m =
+(*ex 6 *)
 
-
-	let 
-
-
-	let rec aux debut fin = match fin with
-
-
-		|[] -> debut
-
-
-		|t::q -> 
-
-
-			if t = m then debut @ q
-
-
-			else aux (t::debut) q
-
-
-	in aux [] l;;
-
-
-	
-
-
-let tri_selection l =
-
-
-	let rec aux l_triee reste = match reste with
-
-
-		|[] -> List.rev l_triee
-
-
-		|t::q -> let m = (minimum reste) in 
-
-
-			aux (m::l_triee) (extraction reste m)
-
-
-	in aux [] l;;
-
-
-	
-
-
-let separation l =
-
-
-	let len = List.length l in
-
-
-	let rec aux g d = function
-
-
-		|i when i = len / 2 -> g, d
-
-
-		|i -> match d with	
-
-
-			|[] -> raise (Failure "cas impossible")
-
-
-			|t::q -> aux (t::g) q (i+1)
-
-
-	in aux [] l 0;;
-
-
-let rec est_normal p = match p with
-| [] -> true
-| [t] -> if t = 0. then false 
-         else true
-| t::q -> est_normal q;;
-
-let dilatation p a = match p with
-	let rec aux 
-		| [] -> []
-		| t::q -> dilatation 
-
-  let somme p1 p2 =
-    let rec aux acc l1 l2 = match (l1, l2) with
-        | ([], []) -> List.rev acc
-        | (t::q, []) -> aux (t::acc) q []
-        | ([], t::q) -> aux (t::acc) [] q
-        | (t1::q1, t2::q2) -> aux ((t1 +. t2)::acc) q1 q2
-    in aux [] p1 p2;;
-
-let evaluation p v =
-    match p with
-    | [] -> 0.
-    | a::q -> a +. v*(evaluation q v);;
-
-let foisXn p n =
-	let rec aux l k = match k with
-		|0 -> l
-		| _ -> aux  (0::l) (k-1)
-	in aux (p) n;;
-
-let a = foisXn [1;2;3;4;5;6] 3;;
-
-let separer l = 
-	let taille = List.length l in 
-	let rec aux l k l1 l2 = match l with
-		|[] -> List.rev l2, List.rev l1
-		|t::q -> if k >= (taille/2) then aux q (k+1) (t::l1) l2
-					else aux q (k+1) l1 (t::l2)
-	in aux l 0 [] [];;
-	
-	
-let b = separer [1;2;3;4;5;6;7;8;9];;
-
-let rec karatsuba a b = 
-	
+type strahler = F | N of strahler * strahler;;
