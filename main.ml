@@ -1,124 +1,88 @@
-type 'a ab = Vide | N of 'a * 'a ab * 'a ab;;
-
-
-type ('a,'b) abs = F of 'a | NI of 'b * ('a,'b) abs * ('a,'b) abs;;
-
-let rec complet_ab n e =
-
-	if n<=0 then Vide
-	else N(e, complet_ab (n-1) e, complet_ab (n-1) e);;
-
-
-
-let rec complet_abs n e =
-	if n<=0 then F e
-   else NI(e, complet_abs (n-1) e, complet_abs (n-1) e);;
-
-
-let complet2_abs n =
-	 let rec aux h k =
-		if h<=0 then F k
-		else NI(k, aux (h-1) (2*k), aux (h-1) (2*k+1))
-	in aux n 1;;
-
-
-
-
-(* ex 2*)
-
-
-type 'a ag = NG of 'a * 'a ag list;;
-
-
-let rec nb_feuilles = function
-	|NG(_,[]) -> 1
-	|NG(_,l) -> fold_left (fun acc t -> acc + nb_feuilles t) 0 l;;
-
-
-
-let rec hauteur = function
-	|NG(_,[]) -> 0
-	|NG(_,l) -> 1 + fold_left (fun acc t -> max acc (hauteur t)) 0 l;;
-
-
-(* ex 3*)
-
-let rec max_ab = function
-   |Vide -> failwith "vide"
-	|N(v,g,d) ->
-		 let mg = match g with Vide -> v | _ -> max_ab g in
-		let md = match d with Vide -> v | _ -> max_ab d in
-	     max v (max mg md);;
-
-
-
-let rec max_abs = function
-	|F v -> v
-	|NI(v,g,d) -> max v (max (max_abs g) (max_abs d));;
-
-
-
-
-
-let list_prof_ab a x =
-	let rec aux t prof =
-		 match t with
+type 'a ab = Vide | Noeud of 'a * 'a ab * 'a ab;;
+ 
+ 
+(* exo 1 *)
+ 
+type arbre = F | N of arbre * arbre;;
+ 
+let rec meme_structure a b = match a, b with
+	|Vide, Vide -> true
+	|Vide, _ | _, Vide -> false
+	|Noeud(_,fg1,fd1), Noeud(_,fg2,fd2) -> meme_structure fg1 fg2 && meme_structure fd1 fd2;;
+ 
+let rec sous_arbre a b = match b with
+	|Vide -> a = Vide
+	|Noeud(_,fg,fd) -> meme_structure a b || sous_arbre a fg || sous_arbre a fd;;
+ 
+ 
+(* exo 2*)
+ 
+let est_un_ABR arbre =
+	let rec aux min max = function
+		|Vide -> true
+		|Noeud(a,fg,fd) -> a > min && a < max && aux min a fg && aux a max fd
+	in aux min_int max_int arbre;;
+ 
+let rec cherche x = function
+	|Vide -> false
+	|Noeud(a,fg,fd) ->
+		if x = a then true
+		else if x < a then cherche x fg
+		else cherche x fd;;
+ 
+let rec minimum = function
+	|Vide -> failwith "arbre vide"
+	|Noeud(a,Vide,_) -> a
+	|Noeud(_,fg,_) -> minimum fg;;
+ 
+let rec taille = function
+	|Vide -> 0
+	|Noeud(_,fg,fd) -> 1 + taille fg + taille fd;;
+ 
+let rec keme k = function
+	|Vide -> failwith "k trop grand"
+	|Noeud(a,fg,fd) ->
+		let t = taille fg in
+		if k = t+1 then a
+		else if k <= t then keme k fg
+		else keme (k-t-1) fd;;
+ 
+let rec ajout x = function
+	|Vide -> Noeud(x,Vide,Vide)
+	|Noeud(a,fg,fd) ->
+		if x <= a then Noeud(a, ajout x fg, fd)
+		else Noeud(a, fg, ajout x fd);;
+ 
+let tri l =
+	let abr = List.fold_right ajout l Vide in
+	let rec infixe = function
 		|Vide -> []
-		|N(v,g,d) ->
-			 let l = if v=x then [prof] else [] in
-			l @ (aux g (prof+1)) @ (aux d (prof+1))
-in aux a 0;;
-
-
-
-let list_prof_abs a x =
-	let rec aux t prof =
-		match t with
-		|F v -> if v=x then [prof] else []
-		|NI(v,g,d) ->
-			let l = if v=x then [prof] else [] in
-			l @ (aux g (prof+1)) @ (aux d (prof+1))
-	in aux a 0;;
-
-
-(* ex 4 *) 
-
-
-
-let generation a n =
-	let rec aux t prof =
-		match t with
-		|Vide -> []
-		|N(v,g,d) ->
-			if prof = n then [v]
-			else (aux g (prof+1)) @ (aux d (prof+1))
-	in aux a 0;;
-
-
-
-
-let parcours_profondeur a =
-	let rec aux = function
-		|Vide -> ()
-		|N(v,g,d) ->
-			printf "%d\n" v;
-			aux g;
-			aux d
-	in aux a;;
-
-
-
-
-
-(* ex 5 *)
-let somme_profondeurs a =
-	let rec aux t prof =
-		match t with
-		|Vide -> 0
-		|N(_,Vide,Vide) -> prof
-		|N(_,g,d) -> (aux g (prof+1)) + (aux d (prof+1))
-	in aux a 0;;
-
-(*ex 6 *)
-
-type strahler = F | N of strahler * strahler;;
+		|Noeud(a,fg,fd) -> infixe fg @ [a] @ infixe fd
+	in infixe abr;;
+ 
+let rec ajout_racine x = function
+	|Vide -> Noeud(x,Vide,Vide)
+	|Noeud(a,fg,fd) ->
+		if x <= a then match ajout_racine x fg with
+			|Noeud(y,g,d) -> Noeud(y, g, Noeud(a,d,fd))
+			|Vide -> assert false
+		else match ajout_racine x fd with
+			|Noeud(y,g,d) -> Noeud(y, Noeud(a,fg,g), d)
+			|Vide -> assert false;;
+ 
+let rec extraire_max = function
+	|Vide -> failwith "arbre vide"
+	|Noeud(a,fg,Vide) -> (a, fg)
+	|Noeud(a,fg,fd) -> let (m,fd') = extraire_max fd in (m, Noeud(a,fg,fd'));;
+ 
+let supp_racine = function
+	|Vide -> failwith "arbre vide"
+	|Noeud(_,Vide,fd) -> fd
+	|Noeud(_,fg,fd) -> let (m,fg') = extraire_max fg in Noeud(m,fg',fd);;
+ 
+let rec supp x = function
+	|Vide -> Vide
+	|Noeud(a,fg,fd) ->
+		if x = a then supp_racine (Noeud(a,fg,fd))
+		else if x < a then Noeud(a, supp x fg, fd)
+		else Noeud(a, fg, supp x fd);;
